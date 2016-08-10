@@ -84,6 +84,9 @@ hosted-release: | check-ebbrt-src $(HOSTED_RELEASE_DIR)
 	$(CD) $(HOSTED_RELEASE_DIR) && $(CMAKE) -DCMAKE_BUILD_TYPE=Release  \
 		$(MYDIR) && $(MAKE)
 
+threadtest: threadtest.cpp
+	g++ -O4 -std=c++11 $< -o $@ -lpthread
+
 clean:
 	$(MAKE) clean -C $(HOSTED_DEBUG_DIR) && \
 	$(MAKE) clean -C $(HOSTED_RELEASE_DIR) && \
@@ -92,6 +95,7 @@ clean:
 
 distclean:
 	$(RMF) $(HOSTED_DEBUG_DIR) && \
-	$(RMF) $(HOSTED_RELEASE_DIR)
+	$(RMF) $(HOSTED_RELEASE_DIR) && \
+	$(RMF) threadtest
 
 .PHONY: Debug Release all clean baremetal baremetal-debug baremetal-release hosted hosted-debug hosted-release
