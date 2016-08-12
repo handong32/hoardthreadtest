@@ -12,6 +12,7 @@
 #include <ebbrt/Multiboot.h>
 #include <ebbrt/SpinBarrier.h>
 #include <ebbrt/UniqueIOBuf.h>
+#include <ebbrt/Acpi.h>
 
 typedef ebbrt::clock::HighResTimer MyTimer;
 static inline void ns_start(MyTimer &t) { t.tick(); }
@@ -127,7 +128,7 @@ void AppMain() {
     // spawn jobs on each core using SpawnRemote
     ebbrt::event_manager->SpawnRemote(
         [theCpu, ncpus, &count, &context, i]() {
-          ebbrt::kprintf("running core %d of %d\n", (int)i, (int)ncpus);
+	    //ebbrt::kprintf("running core %d of %d\n", (int)i, (int)ncpus);
           worker();
           count++;
           bar.Wait();
@@ -144,4 +145,6 @@ void AppMain() {
   ns = ns_stop(tmr);
 
   ebbrt::kprintf("hoardthreadtest time elapsed = %" PRIu64 " ~ns\n", ns);
+
+  ebbrt::acpi::PowerOff();
 }
