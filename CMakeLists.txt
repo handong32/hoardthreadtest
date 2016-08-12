@@ -7,12 +7,10 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g3")
 project("hoardthreadtest-ebbrt" CXX)
 
 set(HOSTED_SOURCES 
-      src/hosted/hoardthreadtest.cc 
-      src/hosted/Printer.cc)
+      src/hosted/hoardthreadtest.cc)
 
 set(BAREMETAL_SOURCES 
-      src/baremetal/hoardthreadtest.cc 
-      src/baremetal/Printer.cc)
+      src/baremetal/hoardthreadtest.cc)
 
 # Baremetal  ========================================================
 
