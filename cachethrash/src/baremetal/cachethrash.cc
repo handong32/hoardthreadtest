@@ -66,7 +66,7 @@ void AppMain() {
   uint64_t ns;
   MyTimer tmr;
 
-  ebbrt::kprintf("Running cache-scratch for %d threads, %d iterations,"
+  ebbrt::kprintf("Running cache-thrash for %d threads, %d iterations,"
                  " %d repetitions and %d objSize...\n",
                  nthreads, niterations, repetitions, objSize);
 
@@ -76,11 +76,6 @@ void AppMain() {
   std::atomic<size_t> count(0);
   size_t theCpu = ebbrt::Cpu::GetMine();
 
-  // Allocate nthreads objects and distribute them among the threads.
-  char **objs = new char *[nthreads];
-  for (i = 0; i < nthreads; i++) {
-    objs[i] = new char[objSize];
-  }
   workerArg *w = new workerArg[nthreads];
 
   ns_start(tmr);
@@ -88,9 +83,9 @@ void AppMain() {
   for (i = 0; i < (int)ncpus; i++) {
     // spawn jobs on each core using SpawnRemote
     ebbrt::event_manager->SpawnRemote(
-        [theCpu, ncpus, &count, &context, i, &objs, &w]() {
+        [theCpu, ncpus, &count, &context, i, &w]() {
           w[i] =
-              workerArg(objs[i], objSize, repetitions / nthreads, niterations);
+              workerArg(objSize, repetitions / nthreads, niterations);
 
           worker((void *)&w[i]);
 
