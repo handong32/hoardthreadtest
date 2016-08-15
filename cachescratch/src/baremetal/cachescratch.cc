@@ -17,9 +17,9 @@
 #include "../common/worker.h"
 
 int nthreads = 1;       // Default number of threads.
-int niterations = 1000; // Default number of iterations.
-int repetitions = 1000000;
-int objSize = 1;
+int niterations = 1000000; // Default number of iterations.
+int repetitions = 100;
+int objSize = 8;
 
 static size_t indexToCPU(size_t i) { return i; }
 
@@ -108,7 +108,7 @@ void AppMain() {
 
   ns = ns_stop(tmr);
 
-  ebbrt::kprintf("cache-thrash time elapsed = %" PRIu64 " ~ns\n", ns);
+  ebbrt::kprintf("cache-scratch time elapsed = %" PRIu64 " ~ns\n", ns);
 
   ebbrt::acpi::PowerOff();
 }

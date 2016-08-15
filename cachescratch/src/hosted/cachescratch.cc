@@ -50,9 +50,9 @@
 
 int main(int argc, char *argv[]) {
   int nthreads = 1;      // Default number of threads.
-  int iterations = 1000; // Default number of iterations.
-  int repetitions = 1000000;
-  int objSize = 1;
+  int iterations = 1000000; // Default number of iterations.
+  int repetitions = 100;
+  int objSize = 8;
 
   uint64_t ns;
   MyTimer tmr;
@@ -63,6 +63,10 @@ int main(int argc, char *argv[]) {
     objSize = atoi(argv[3]);
     repetitions = atoi(argv[4]);
   }
+
+  printf("Running cache-scratch for %d threads, %d iterations,"
+                 " %d repetitions and %d objSize...\n",
+                 nthreads, iterations, repetitions, objSize);
 
   HL::Fred *threads = new HL::Fred[nthreads];
   HL::Fred::setConcurrency(HL::CPUInfo::getNumProcessors());

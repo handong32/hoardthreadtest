@@ -35,7 +35,7 @@ elseif( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
 
   find_package(EbbRT REQUIRED)
   find_package(Boost 1.53.0 REQUIRED COMPONENTS 
-    filesystem system coroutine context program_options)
+    filesystem system coroutine context)
   find_package(Capnp REQUIRED)
   find_package(TBB REQUIRED)
   
