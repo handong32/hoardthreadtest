@@ -46,6 +46,25 @@ static unsigned int thread_count = 1;
 
 static size_t indexToCPU(size_t i) { return i; }
 
+int ParseInt(std::string str, std::string mstr) {
+  auto test = str.find(mstr);
+  if (test == std::string::npos)
+    return -1;
+  auto test2 = str.substr(test);
+
+  auto test3 = test2.find(";");
+  if (test3 == std::string::npos)
+    return -1;
+  auto test4 = test2.substr(0, test3);
+
+  auto test5 = test4.find("=");
+  if (test5 == std::string::npos)
+    return -1;
+  auto test6 = test4.substr(test5 + 1);
+  // ebbrt::kprintf("%d\n", atoi(test6.c_str()));
+  return atoi(test6.c_str());
+}
+
 namespace {
 ebbrt::ExplicitlyConstructed<ebbrt::SpinBarrier> bar;
 }
@@ -54,6 +73,20 @@ ebbrt::ExplicitlyConstructed<ebbrt::SpinBarrier> bar;
 
 void AppMain() {
   unsigned int i;
+  int ret = 0;
+  
+  auto cmdline = std::string(ebbrt::multiboot::CmdLine());
+  ret = ParseInt(cmdline, "niterations=");
+  if (ret != -1)
+    iteration_count = ret;
+
+  ret = ParseInt(cmdline, "objSize=");
+  if (ret != -1)
+    size = ret;
+
+  ret = ParseInt(cmdline, "nthreads=");
+  if (ret != -1)
+    thread_count = ret;
 
   ebbrt::kprintf("Object size: %lu, Iterations: %lu, Threads: %d\n", size,
                  iteration_count, thread_count);
