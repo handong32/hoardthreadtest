@@ -242,6 +242,9 @@ void AppMain() {
   if (ret != -1)
     max_threads = ret;
 
+  ebbrt::kprintf ("sleep = %ld, min = %d, max = %d, per thread = %d, num rounds = %d, seed = %d, max_threads = %d, min_threads = %d\n",
+	    sleep_cnt, min_size, max_size, chperthread, num_rounds, seed, max_threads, min_threads);
+
   if (num_chunks > MAX_BLOCKS) {
     ebbrt::kprintf("Max %d chunks - exiting\n", MAX_BLOCKS);
     ebbrt::acpi::PowerOff();
