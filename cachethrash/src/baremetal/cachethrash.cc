@@ -67,7 +67,7 @@ void AppMain() {
   MyTimer tmr;
 
   ebbrt::kprintf("Running cache-thrash for %d threads, %d iterations,"
-                 " %d repetitions and %d objSize...\n",
+                 " %d repetitions and %d objSize...  ",
                  nthreads, niterations, repetitions, objSize);
 
   size_t ncpus = nthreads; // ebbrt::Cpu::Count();

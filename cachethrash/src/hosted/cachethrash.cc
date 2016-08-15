@@ -59,6 +59,10 @@ int main(int argc, char *argv[]) {
     repetitions = atoi(argv[4]);
   }
 
+  printf("Running cache-thrash for %d threads, %d iterations,"
+	 " %d repetitions and %d objSize...  ",
+	 nthreads, iterations, repetitions, objSize);
+
   HL::Fred *threads = new HL::Fred[nthreads];
   HL::Fred::setConcurrency(HL::CPUInfo::getNumProcessors());
 
