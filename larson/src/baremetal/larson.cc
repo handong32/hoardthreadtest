@@ -291,11 +291,11 @@ void runthreads(long sleep_cnt, int min_threads, int max_threads,
   nperthread = chperthread;
   stopflag = FALSE;
 
-  // size_t ncpus = nthreads; // ebbrt::Cpu::Count();
-  // static ebbrt::SpinBarrier bar(ncpus);
-  // ebbrt::EventManager::EventContext context;
-  // std::atomic<size_t> count(0);
-  // size_t theCpu = ebbrt::Cpu::GetMine();
+  size_t ncpus = ebbrt::Cpu::Count();
+  static ebbrt::SpinBarrier bar(ncpus);
+  ebbrt::EventManager::EventContext context;
+  std::atomic<size_t> count(0);
+  size_t theCpu = ebbrt::Cpu::GetMine();
 
   for (i = 0; i < num_threads; i++) {
     de_area[i].threadno = i + 1;
@@ -316,10 +316,21 @@ void runthreads(long sleep_cnt, int min_threads, int max_threads,
 
     //_beginthread(exercise_heap, 0, &de_area[i]);
     // spawn jobs on each core using SpawnRemote
+    // spawn jobs on each core using SpawnRemote
     ebbrt::event_manager->SpawnRemote(
-        [&de_area, i]() { exercise_heap(static_cast<void *>(&de_area[i])); },
+        [theCpu, ncpus, &count, &context, i, &de_area]() {
+	    exercise_heap(static_cast<void *>(&de_area[i]));
+          count++;
+          bar.Wait();
+          while (count < (size_t)ncpus)
+            ;
+          if (ebbrt::Cpu::GetMine() == theCpu) {
+            ebbrt::event_manager->ActivateContext(std::move(context));
+          }
+        },
         indexToCPU((size_t)i));
   }
+  ebbrt::event_manager->SaveContext(context);
 
   QueryPerformanceCounter(&start_cnt);
 
