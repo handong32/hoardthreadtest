@@ -9,6 +9,7 @@
 #include <ebbrt/GeneralPurposeAllocator.h>
 #include <ebbrt/Rdtsc.h>
 #include <ebbrt/SpinBarrier.h>
+#include <ebbrt/Acpi.h>
 
 #define MULTICORE
 
@@ -159,6 +160,8 @@ void Work() {
 
   barrier->Wait();
 
+  ebbrt::acpi::PowerOff();
+  
   /*for (auto &sample : samples) {
     ebbrt::clock::HighResTimer timer;
     timer.tick();
