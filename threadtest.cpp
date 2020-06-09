@@ -33,6 +33,8 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <atomic>
+#include <cstdint>
 
 using namespace std;
 using namespace std::chrono;
@@ -41,6 +43,8 @@ using namespace std::chrono;
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "pcm_lite/Perf.h"
+#include "pcm_lite/Rapl.h"
 
 
 int niterations = 50;	// Default number of iterations.
@@ -49,6 +53,11 @@ int nthreads = 1;	// Default number of threads.
 int work = 0;		// Default number of loop iterations.
 int objSize = 1;
 
+std::atomic<uint64_t> ninstructions(0);
+std::atomic<uint64_t> ncycles(0);
+std::atomic<uint64_t> nllc_miss(0);
+std::atomic<uint64_t> nllc_ref(0);
+std::atomic<uint64_t> joules(0);
 
 class Foo {
 public:
@@ -66,6 +75,29 @@ void worker ()
 {
   int i, j;
   Foo ** a;
+  size_t mcore;
+  rapl::RaplCounter rp;
+  perf::PerfCounter nins;
+  perf::PerfCounter ncyc;
+  perf::PerfCounter nllcm;
+  perf::PerfCounter nllcr;
+  
+  mcore = sched_getcpu();
+  nins = perf::PerfCounter(perf::PerfEvent::fixed_instructions);
+  ncyc = perf::PerfCounter(perf::PerfEvent::fixed_cycles);
+  nllcm = perf::PerfCounter(perf::PerfEvent::llc_misses);
+  nllcr = perf::PerfCounter(perf::PerfEvent::llc_references);
+  
+  if(mcore == 0 || mcore == 1) {
+    rp = rapl::RaplCounter();
+    rp.Start();
+  }
+  
+  nins.Start();
+  ncyc.Start();
+  nllcm.Start();
+  nllcr.Start();
+  
   a = new Foo * [nobjects / nthreads];
 
   for (j = 0; j < niterations; j++) {
@@ -99,12 +131,31 @@ void worker ()
   }
 
   delete [] a;
+  nins.Stop();
+  ncyc.Stop();
+  nllcm.Stop();
+  nllcr.Stop();
+  if(mcore == 0 || mcore == 1) {    
+      rp.Stop();
+      joules.fetch_add(rp.Read(), std::memory_order_relaxed);
+      rp.Clear();
+  }
+
+  ninstructions.fetch_add(nins.Read(), std::memory_order_relaxed);
+  ncycles.fetch_add(ncyc.Read(), std::memory_order_relaxed);
+  nllc_ref.fetch_add(nllcr.Read(), std::memory_order_relaxed);
+  nllc_miss.fetch_add(nllcm.Read(), std::memory_order_relaxed);
+  
+  nins.Clear();
+  ncyc.Clear();
+  nllcm.Clear();
+  nllcr.Clear();  
 }
 
 int main (int argc, char * argv[])
 {
   thread ** threads;
-  
+ 
   if (argc >= 2) {
     nthreads = atoi(argv[1]);
   }
@@ -143,9 +194,14 @@ int main (int argc, char * argv[])
 
   auto stop = t.now();
   auto elapsed = duration_cast<duration<double>>(stop - start);
-
-  cout << "Time elapsed = " << elapsed.count() << endl;
-
+  cout << "Time Instructions Cycles LLC_REF LLC_MISS Joules" << endl;
+  cout << elapsed.count() << " "
+       << ninstructions << " "
+       << ncycles << " "
+       << nllc_ref << " "
+       << nllc_miss << " "
+       << joules << endl;
+  
   delete [] threads;
 
   return 0;

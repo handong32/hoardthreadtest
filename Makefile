@@ -85,7 +85,7 @@ hosted-release: | check-ebbrt-src $(HOSTED_RELEASE_DIR)
 		$(MYDIR) && $(MAKE)
 
 threadtest: threadtest.cpp
-	g++ -O4 -std=c++11 $< -o $@ -lpthread
+	g++ -O4 -std=c++11 $< pcm_lite/Cpuid.cc pcm_lite/Msr.cc pcm_lite/Perf.cc pcm_lite/Rapl.cc -o $@ -lpthread
 
 clean:
 	$(MAKE) clean -C $(HOSTED_DEBUG_DIR) && \
